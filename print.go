@@ -67,7 +67,7 @@ func anyTypeToStr(val reflect.Value) string {
 		}
 		return fmt.Sprintf("[%s]", strings.Join(flatten, ", "))
 	case reflect.Array, reflect.Slice:
-		if val.Type().ConvertibleTo(reflect.TypeOf([]byte(nil))) {
+		if val.Type().ConvertibleTo(reflect.TypeOf([]byte(nil))) && val.Len() > 0 {
 			return "<binary data>"
 		}
 		flatten := make([]string, 0, val.Len())

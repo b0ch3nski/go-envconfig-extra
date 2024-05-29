@@ -5,7 +5,6 @@ import (
 	"encoding"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -21,13 +20,7 @@ type FileContent []byte
 // UnmarshalText implements `encoding.TextUnmarshaler` interface for reading file content from FS or string.
 func (fc *FileContent) UnmarshalText(text []byte) error {
 	// try #1: assume input is a filesystem path, try to read file
-	data, err := os.ReadFile(string(text))
-	switch {
-	case errors.Is(err, os.ErrNotExist):
-		// skip
-	case err != nil:
-		return err
-	case err == nil:
+	if data, err := os.ReadFile(string(text)); err == nil {
 		*fc = FileContent(data)
 		return nil
 	}
@@ -60,7 +53,7 @@ func (c *X509Cert) UnmarshalText(text []byte) error {
 
 	pemData, _ := pem.Decode(fc)
 	if pemData == nil || len(pemData.Bytes) == 0 {
-		return errors.New("certificate: no PEM data found")
+		return fmt.Errorf("certificate: no PEM data found")
 	}
 
 	cert, err := x509.ParseCertificate(pemData.Bytes)
