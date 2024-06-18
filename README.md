@@ -17,7 +17,7 @@ go get github.com/b0ch3nski/go-envconfig-extra
 ## example
 
 ```go
-import "github.com/b0ch3nski/go-envconfig-extra"
+import "github.com/b0ch3nski/go-envconfig-extra/envconfigext"
 
 type Config struct {
 	Password1 string `env:"PASS1,required" secret:"redact"`

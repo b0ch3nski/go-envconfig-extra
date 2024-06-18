@@ -53,12 +53,12 @@ func (c *X509Cert) UnmarshalText(text []byte) error {
 
 	pemData, _ := pem.Decode(fc)
 	if pemData == nil || len(pemData.Bytes) == 0 {
-		return fmt.Errorf("certificate: no PEM data found")
+		return fmt.Errorf("no PEM data found")
 	}
 
 	cert, err := x509.ParseCertificate(pemData.Bytes)
 	if err != nil {
-		return fmt.Errorf("certificate: error while parsing: %w", err)
+		return fmt.Errorf("error while parsing: %w", err)
 	}
 
 	*c = X509Cert(*cert)
