@@ -2,8 +2,8 @@ package envconfigext
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-var exampleContent = []byte("example file content ")
+var exampleContent = []byte("example file content")
 
 func TestFileContentFromPath(t *testing.T) {
 	tmp, err := os.CreateTemp("", "")
@@ -53,12 +53,12 @@ func TestX509CertOK(t *testing.T) {
 	sn := big.NewInt(123)
 	cert := x509.Certificate{SerialNumber: sn}
 
-	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	keyPub, keyPrv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	certBytes, err := x509.CreateCertificate(rand.Reader, &cert, &cert, &key.PublicKey, key)
+	certBytes, err := x509.CreateCertificate(rand.Reader, &cert, &cert, keyPub, keyPrv)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,9 +74,18 @@ func TestX509CertOK(t *testing.T) {
 	}
 }
 
-func TestX509CertErrBadInput(t *testing.T) {
-	var x509c X509Cert
-	if err := x509c.UnmarshalText([]byte("garbage")); err == nil {
-		t.Fatal("Error expected, got nil")
+func TestX509CertErr(t *testing.T) {
+	cases := map[string][]byte{
+		"NoPEM":  []byte(exampleContent),
+		"BadPEM": pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: []byte(exampleContent)}),
+	}
+
+	for name, input := range cases {
+		t.Run(name, func(t *testing.T) {
+			var x509c X509Cert
+			if err := x509c.UnmarshalText(input); err == nil {
+				t.Fatal("Error expected, got nil")
+			}
+		})
 	}
 }

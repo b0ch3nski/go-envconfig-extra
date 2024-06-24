@@ -26,8 +26,9 @@ func (fc *FileContent) UnmarshalText(text []byte) error {
 	}
 
 	// try #2: assume input is base64 encoded string, try to decode it
-	*fc = make(FileContent, base64.StdEncoding.DecodedLen(len(text)))
-	if _, err := base64.StdEncoding.Decode(*fc, text); err == nil {
+	dec := make(FileContent, base64.StdEncoding.DecodedLen(len(text)))
+	if n, err := base64.StdEncoding.Decode(dec, text); err == nil {
+		*fc = dec[:n:n]
 		return nil
 	}
 
